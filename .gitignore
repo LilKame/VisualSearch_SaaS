@@ -1,0 +1,40 @@
+# =========================
+# .NET (já está ok, mantive resumido)
+# =========================
+bin/
+obj/
+Debug/
+Release/
+
+# =========================
+# VS / VSCode
+# =========================
+.vs/
+.vscode/
+
+# =========================
+# Python / AI Engine
+# =========================
+# Ambiente virtual
+Ai-Engine/venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Modelos pesados (CLIP, etc)
+Ai-Engine/models/
+*.pt
+*.pth
+*.onnx
+
+# =========================
+# Docker (opcional)
+# =========================
+*.log
+
+# =========================
+# Outros
+# =========================
+.env

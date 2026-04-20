@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="VisualSearch.Api/VisualSearch.Api.csproj" />
+  <Project Path="VisualSearch.Application/VisualSearch.Application.csproj" />
+  <Project Path="VisualSearch.Domain/VisualSearch.Domain.csproj" />
+  <Project Path="VisualSearch.Infrastructure/VisualSearch.Infrastructure.csproj" />
+</Solution>
