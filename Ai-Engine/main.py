@@ -7,6 +7,10 @@ import numpy as np
 import asyncio
 import time
 
+# Ligar a IA:
+# Dentro da pasta ai-engine, com o venv ativado
+# uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
 from preprocess import preprocess_image, l2_normalize
 
 MODEL_PATH = "./models/clip_vit_b32.onnx"

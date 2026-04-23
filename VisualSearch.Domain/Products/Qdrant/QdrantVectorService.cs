@@ -6,6 +6,7 @@ using Qdrant;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using Microsoft.EntityFrameworkCore.Query;
+using System.Xml.Serialization;
 
 namespace VisualSearch.Application.Qdrant
 {
@@ -14,6 +15,7 @@ namespace VisualSearch.Application.Qdrant
         // Nome da coleção no Qdrant - como uma "tabela" para os vetores;
         private const string CollectionName = "products";
 
+        // Criar a coleção caso ela não exista;
         public async Task EnsureCollectionExistsAsync(CancellationToken ct = default)
         {
             // Verifica se já existe uma "tabela" com esse nome;
@@ -33,7 +35,7 @@ namespace VisualSearch.Application.Qdrant
                 }, cancellationToken: ct);
         }
 
-        // Atualizar o banco de dados;
+        // Atualizar o banco do Qdrant;
         public async Task UpsertAsync(VectorPoint point, CancellationToken ct = default)
         {
             var payload = point.Payload.ToDictionary(
@@ -59,13 +61,59 @@ namespace VisualSearch.Application.Qdrant
         // Proucurar pelas imagens;
         public async Task<List<VectorSearchResult>> SearchAsync(VectorSearchRequest request, CancellationToken ct = default)
         {
+            Filter? filter = null;
+            if( request.CategoryFilter is not null)
+            {
+                filter = new Filter
+                {
+                    Must =
+                    {
+                        new Condition
+                        {
+                            Field = new FieldCondition
+                            {
+                                Key = "category",
+                                Match = new Match {Text = request.CategoryFilter}
+                            }
+                        }
+                    }
 
+                };
+
+
+            }
+                var results = await client.SearchAsync
+                (
+                   collectionName : CollectionName,
+                   vector : request.Vector,
+                   limit : (ulong)request.Limit,
+                   scoreThreshold : request.ScoreThreshold,
+                   filter : filter,
+                   cancellationToken : ct
+                );
+
+                return results.Select(r => new VectorSearchResult
+                (
+                    Id: Guid.Parse(r.Id.Uuid),
+                    Score: r.Score,
+                    Payload: r.Payload.ToDictionary
+                    (
+                        kv => kv.Key,
+                        kv => (object)kv.Value.StringValue
+                    )
+
+                )).ToList();
         }
 
         // Deletar registros
         public async Task DeleteAsync(Guid id, CancellationToken ct = default)
         {
-
+            await client.DeleteAsync
+            (
+                CollectionName,
+                id : new PointId { Uuid = id.ToString()},
+                cancellationToken: ct
+            );
         }
     }
 }

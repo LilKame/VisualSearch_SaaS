@@ -4,7 +4,7 @@ using VisualSearch.Infrastructure.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serviços
+// Serviços e DI;
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddControllers();
 
