@@ -27,7 +27,7 @@ namespace VisualSearch.Api.Features.Catalog
                 [FromForm] string? categoryItem,
                 [FromForm] string angle,
                 IFormFile image,
-                CatalogProductService service,
+                [FromServices]CatalogProductService service,
                 CancellationToken ct
          )
          {
@@ -40,6 +40,9 @@ namespace VisualSearch.Api.Features.Catalog
 
             // Salvamos a imagem no MinIO e pegamos o caminho gerado;
             var storagePath = await service.ProcessImageInMinio("products", imageStream, productCode, angle, "jpg", ct);
+
+            // Voltamos o ponteiro para o inicio;
+            imageStream.Position = 0;
 
             // Processamos e geramos o embedding;
             try

@@ -12,8 +12,9 @@ using VisualSearch.Infrastructure.AiEngine;
 using VisualSearch.Infrastructure.Persistence;
 using VisualSearch.Infrastructure.Storage;
 using VisualSearch.Infrastructure.VectorStore;
+using VisualSearch.Application;
 
-namespace VisualSearch.Infrastructure.Utils
+namespace VisualSearch.Infrastructure.DependencyInjection
 {
     public static class DependencyInjection
     {
@@ -44,7 +45,7 @@ namespace VisualSearch.Infrastructure.Utils
 
             services.AddMinio(client => client
             .WithEndpoint(configuration["MinIO:Endpoint"] ?? "localhost:9000")
-            .WithCredentials(configuration["MinIO:AcessKey"] ?? "minioadmin"
+            .WithCredentials(configuration["MinIO:AccesKey"] ?? "minioadmin"
             , configuration["MinIO:SecretKey"] ?? "minioadmin123")
             .WithSSL(false)
             .Build()

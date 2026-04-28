@@ -22,10 +22,10 @@ namespace VisualSearch.Api.Features.Search
 
         private static async Task<IResult> HandleAsync
         (
-            [FromForm] IFormFile iamge,
+            IFormFile iamge,
             [FromForm] string? category,
-            SearchProductService searchService,
-            CatalogProductService catalogService,
+            [FromServices]SearchProductService searchService,
+            [FromServices]CatalogProductService catalogService,
             CancellationToken ct
         )
         {
@@ -41,6 +41,7 @@ namespace VisualSearch.Api.Features.Search
                 // Processamos a imagem e pegamos o vetor
                 embeddding = await catalogService.ProcessImageAsync(stream, ct);
             }
+
             catch(HttpRequestException)
             {
                 return Results.Problem

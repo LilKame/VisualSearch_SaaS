@@ -1,36 +1,35 @@
 using Microsoft.EntityFrameworkCore;
 using VisualSearch.Api.Features.Catalog;
+using VisualSearch.Api.Features.Search;
+using VisualSearch.Application.DependencyInjection;
 using VisualSearch.Infrastructure;
-using VisualSearch.Infrastructure.Utils;
+using VisualSearch.Infrastructure.DependencyInjection;
+using VisualSearch.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Serviços e DI;
+// Iniciando Qdrant,Serviço Python e serviços internos;
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddControllers();
+builder.Services.AddApplication();
 
-// Swagger (TEM QUE VIR ANTES DO BUILD)
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
-// Instanciar os Endpoints das Minimal APIs;
+// Endpoints
 app.MapCatalogEndpoints();
-app.Ma
+app.MapSearchEndpoints();
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
+// Garante que as migrations foram aplicadas ao subir
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 app.Run();
