@@ -24,7 +24,7 @@ namespace VisualSearch.Infrastructure.Storage
                 .WithBucket(BucketName)
                 .WithObject(objectPath)
                 .WithStreamData(data)
-                .WithObjectSize(data.Length > 0 ? data.Length : -1) // Se o tamanho for menor que 0(ou seja vazio) deixa como -1;
+                .WithObjectSize(data.Length > 0 ? data.Length : -1) // Se o tamanho for menor que 0 (ou seja vazio) deixa como -1;
                 .WithContentType(contentType);
 
             // Enviamos para o bucket
@@ -39,7 +39,7 @@ namespace VisualSearch.Infrastructure.Storage
         {
             // Aqui alocamos espaço na memória.
             // Obs: A memória é alocada automaticamente começando por pouca memória e ajustando dinamicamente;
-            using var memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
 
             // Criamos os argumentos
             var args = new GetObjectArgs()
@@ -73,12 +73,12 @@ namespace VisualSearch.Infrastructure.Storage
                 .WithObject(objectPath)
                 .WithExpiry(expiredTime);
 
-            // Enviamos a string aqui, o retorno da função já retorna uma string, não precisamos converter;
-            await client.PresignedGetObjectAsync(args);
+            
 
             logger.LogDebug("Url created {Path}", BucketName);
 
-            return null;
+            // Enviamos a string aqui, o retorno da função já retorna uma string, não precisamos converter;
+            return await client.PresignedGetObjectAsync(args); ;
         }
 
         // Verifica se o bucket existe, se não cria automáticamente;

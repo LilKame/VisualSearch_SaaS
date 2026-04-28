@@ -15,7 +15,9 @@ namespace VisualSearch.Api.Features.Catalog
         {
             // Rota para catalogar itens;
             // MapPost( "rota" , função chamada);
-            app.MapPost("/api/v1/catalog", HandleAsync);
+            app.MapPost("/api/v1/catalog", HandleAsync)
+                .DisableAntiforgery()
+                .WithName("CatalogProduct");
         }
 
          private static async Task<IResult> HandleAsync
@@ -35,13 +37,20 @@ namespace VisualSearch.Api.Features.Catalog
 
             // Declaramos a variável que vai armazenar o embedding;
             float[] embedding;
+
+            // Salvamos a imagem no MinIO e pegamos o caminho gerado;
+            var storagePath = await service.ProcessImageInMinio("products", imageStream, productCode, angle, "jpg", ct);
+
             // Processamos e geramos o embedding;
             try
             {
                 embedding = await service.ProcessImageAsync(imageStream, ct);
             }
-            catch(HttpRequestException ex)
+            catch(HttpRequestException)
             {
+                // Se der erro em processar a imagem retiramos ela do MinIO;
+                await service.DeleteImageInMinio(storagePath, ct);
+
                 return Results.Problem(
                     detail: "Erro na requisição."
                     ,statusCode: 502
@@ -49,20 +58,17 @@ namespace VisualSearch.Api.Features.Catalog
             }
 
             // Salvamos o produto no banco;
-            var product = await service.SaveEmbeddingInDbAsync(productCode, productName, categoryItem,ct);
-
-            // Adicionamos a imagem ao produto;
-            // Declaramos por enquanto que não temos a lógica;
-            ProductImage productImage = null;
+            var product = await service.SaveEmbeddingInDbAsync(productCode, productName,angle,categoryItem,storagePath,ct);
+            var productImage = product.Images.Last();
 
             // Aqui criamos um novo ID;
             Guid vectorId = Guid.NewGuid();
 
             // Agora salvamos no Qdrant;
-            await service.SaveEmbeddingInQdrantAsync(vectorId, embedding, product!, productImage!, categoryItem, ct);
+            await service.SaveEmbeddingInQdrantAsync(vectorId, embedding, product, productImage, categoryItem, ct);
 
             // Salva o ID do vetor na imagem e persiste no PostgreSql;
-            await service.SaveVectorReferenceAsync(productImage!, product!, vectorId, ct);
+            await service.SaveVectorReferenceAsync(productImage, product, vectorId, storagePath, 3600, ct); // 3600 segundos, expira em 1 hora a url de preview;
 
             return Results.Ok(new
             { 

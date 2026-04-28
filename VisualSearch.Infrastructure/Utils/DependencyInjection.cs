@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Minio;
 using Qdrant.Client;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Text;
 using VisualSearch.Application.AiEngine;
 using VisualSearch.Infrastructure.AiEngine;
 using VisualSearch.Infrastructure.Persistence;
+using VisualSearch.Infrastructure.Storage;
 using VisualSearch.Infrastructure.VectorStore;
 
 namespace VisualSearch.Infrastructure.Utils
@@ -39,6 +41,16 @@ namespace VisualSearch.Infrastructure.Utils
                     client.Timeout = TimeSpan.FromSeconds(30);
                 }
             );
+
+            services.AddMinio(client => client
+            .WithEndpoint(configuration["MinIO:Endpoint"] ?? "localhost:9000")
+            .WithCredentials(configuration["MinIO:AcessKey"] ?? "minioadmin"
+            , configuration["MinIO:SecretKey"] ?? "minioadmin123")
+            .WithSSL(false)
+            .Build()
+            );
+
+            services.AddScoped<IObjectStorageService, ObjectStorageService>();
             // Envia para as configurações;
             return services;
         }

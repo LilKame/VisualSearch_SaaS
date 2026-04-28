@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using VisualSearch.Api.Features.Catalog;
 using VisualSearch.Infrastructure;
 using VisualSearch.Infrastructure.Utils;
 
@@ -20,6 +21,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Instanciar os Endpoints das Minimal APIs;
+app.MapCatalogEndpoints();
+app.Ma
 
 app.UseHttpsRedirection();
 

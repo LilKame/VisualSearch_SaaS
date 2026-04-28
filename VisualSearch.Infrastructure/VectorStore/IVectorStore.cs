@@ -13,6 +13,19 @@ namespace VisualSearch.Infrastructure.VectorStore
     // Retorno da API;
     public record VectorSearchResult(Guid Id, float Score, Dictionary<string, object> Payload);
 
+    // Retorno da busca da API;
+    public class ProductSearchResult()
+    {
+        public Guid productId { get; set; }
+        public string productCode { get; set; }
+        public string productName { get; set; }
+        public string? category { get; set; }
+        public double score { get; set; }
+        public Object bestAngle { get; set; }
+        public DateTime? indexedAt { get; set; }
+    }
+
+
     public interface IVectorStoreService
     {
         // Função para salvar no banco;

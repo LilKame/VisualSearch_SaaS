@@ -91,17 +91,19 @@ namespace VisualSearch.Infrastructure.VectorStore
                    cancellationToken : ct
                 );
 
-                return results.Select(r => new VectorSearchResult
+            // Id = Uuid
+            // Score = text
+            // Payload = MapField(string,value)
+            return results.Select(r => new VectorSearchResult
+            (
+                Id: Guid.Parse(r.Id.Uuid),
+                Score: r.Score,
+                Payload: r.Payload.ToDictionary
                 (
-                    Id: Guid.Parse(r.Id.Uuid),
-                    Score: r.Score,
-                    Payload: r.Payload.ToDictionary
-                    (
-                        kv => kv.Key,
-                        kv => (object)kv.Value.StringValue
-                    )
-
-                )).ToList();
+                    kv => kv.Key, kv => (object)kv.Value.StringValue
+                )
+            )
+            ).ToList();
         }
 
         // Deletar registros
