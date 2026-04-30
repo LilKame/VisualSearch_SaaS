@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using VisualSearch.Domain.Products;
 using VisualSearch.Infrastructure.AiEngine;
 using VisualSearch.Infrastructure.Persistence;
 using VisualSearch.Infrastructure.Storage;
@@ -54,15 +55,16 @@ namespace VisualSearch.Application.Features.Search
         /// <returns></returns>
         public async Task<List<ProductSearchResult>> BuildProductSearchResultsAsync(List<VectorSearchResult> request, int numberOfResults, CancellationToken ct)
         {
-            // Buscamos os dados do produto no PostgreSQL
-            var productIds = request.Select(r => Guid.Parse(r.Payload["product_id"].ToString()!));
+            var productIds = request
+                .Select(r => ProductId.From(Guid.Parse(r.Payload["product_id"].ToString()!)))
+                .Distinct()
+                .ToList();
 
-            
             var products = await _db.Products
-                .Include(p => p.Images) // Já traz as imagens junto com o .Include();
-                .Where(p => productIds.Contains(p.Id.Value))
-                .AsNoTracking() // Utilize quando não tiver intenção de alterar o produto;
-                .ToDictionaryAsync(p => p.Id.Value, ct); // Define para Dictonary(Guid,value);
+                .Include(p => p.Images)
+                .Where(p => productIds.Contains(p.Id))
+                .AsNoTracking()
+                .ToDictionaryAsync(p => p.Id.Value, ct);
 
             // Monta o resultado agrupando por produto( melhor score estre as imagens)
             var results = request

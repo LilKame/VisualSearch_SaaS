@@ -87,7 +87,11 @@ namespace VisualSearch.Application.Features.Catalog
             // Garantimos que o ponteiro do Stream está no início;
             data.Position = 0;
             // Gerar o caminho;
-            var storagePath = $"{pathName}/{productCode.ToUpperInvariant}/{angle}-{Guid.NewGuid()}.{contentType}";
+            var extension = contentType.Contains("png") ? "png" :
+                contentType.Contains("webp") ? "webp" :
+                "jpg";
+
+            var storagePath = $"{pathName}/{productCode.ToUpperInvariant()}/{angle}-{Guid.NewGuid()}.{extension}";
 
             // Salvamos no MinIO;
             await _os.UploadAsync(storagePath, data, contentType, ct);
@@ -137,7 +141,11 @@ namespace VisualSearch.Application.Features.Catalog
             }
 
             // Referenciamos a imagem salva no MinIO ao produto;
-            product.AddImage(storagePath, angle, isPrimary: angle == "front");
+            var image = product.AddImage(storagePath, angle, isPrimary: angle == "front");
+
+            _db.ProductImages.Add(image);
+
+            await _db.SaveChangesAsync(ct);
 
             // Retorna o objeto salvo;
             return product;
@@ -196,6 +204,8 @@ namespace VisualSearch.Application.Features.Catalog
             productImage.SetVectorId(vectorId);
             // Marcamos que esse produto está com a imagem indexada;
             product.MarkAsIndexed();
+
+            Console.WriteLine(_db.Entry(productImage).State);
             await _db.SaveChangesAsync(ct);
 
             // Geramos a url paara confirmar o salvamento;

@@ -27,7 +27,7 @@ namespace VisualSearch.Infrastructure.VectorStore
         
                     new VectorParams
                     {
-                        Size = 512,                      // CLIP ViT-B/32 sempre gera 512 dims
+                        Size = 768,                      // CLIP ViT-B/32 sempre gera 512 dims
                         Distance = Distance.Cosine,      // Melhor para embeddings normalizados
                         OnDisk = false                   // Manter em RAM para velocidade máxima
                     

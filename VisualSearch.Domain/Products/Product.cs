@@ -57,14 +57,17 @@ namespace VisualSearch.Domain.Products
             };
         }
 
-        // Apenas vai poder acessar do objeto;
-        public void AddImage(string storagePath,string angle, bool isPrimary = false)
+        public ProductImage AddImage(string storagePath, string angle, bool isPrimary = false)
         {
-            if(isPrimary)
+            if (isPrimary)
             {
                 _images.ForEach(i => i.SetPrimary(false));
             }
-            _images.Add(ProductImage.Create(Id, storagePath, angle, isPrimary));
+
+            var image = ProductImage.Create(Id, storagePath, angle, isPrimary);
+            _images.Add(image);
+
+            return image;
         }
 
         // Marcar que o produto foi indexado;
