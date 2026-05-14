@@ -40,7 +40,7 @@ export default function Layout({ children, title }: LayoutProps) {
 
           {/* Título */}
           <h1 className="text-xl font-bold text-gray-800">
-            Title
+            A Casa Brasileira
           </h1>
         </div>
 

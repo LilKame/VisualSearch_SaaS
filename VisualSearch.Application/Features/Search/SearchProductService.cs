@@ -67,28 +67,41 @@ namespace VisualSearch.Application.Features.Search
                 .ToDictionaryAsync(p => p.Id.Value, ct);
 
             // Monta o resultado agrupando por produto( melhor score estre as imagens)
-            var results = request
+            var tasks = request
                 .GroupBy(r => r.Payload["product_id"].ToString()) //Aqui juntamos os produtos que tem o mesmo id e convertemos para string
                 .Select
-                (g =>
+                (async g =>
                 {
                     var productId = Guid.Parse(g.Key);
                     if (!products.TryGetValue(productId, out var product)) return null;
 
+                    var primaryImage = product.Images.FirstOrDefault(p => p.IsPrimary) // Pegamos a primeira imagem que for primária;
+                    ?? product.Images.FirstOrDefault(); // Se não tiver nenhuma definida como primaria pegamos a primeira imagem;
+
+                    // Pegamos a URL
+                    string? imageUrl = null;
+
+                    if (primaryImage is not null)
+                    {
+                        imageUrl = await _os.GetPresignedUrlAsync(primaryImage.StoragePath);
+                    }
+
                     var bestMatch = g.OrderByDescending(r => r.Score).First();
 
                     return new ProductSearchResult
-                    { 
+                    {
                         productId = productId,
                         productCode = product.Code,
                         productName = product.Name,
                         category = product.Category,
-                        score = Math.Round(bestMatch.Score * 100 , 1), // Transforma o score em porcentagem, ex: 90.8%
+                        score = Math.Round(bestMatch.Score * 100, 1), // Transforma o score em porcentagem, ex: 90.8%
                         bestAngle = bestMatch.Payload["angle"],
-                        indexedAt = product.IndexedAt
+                        indexedAt = product.IndexedAt,
+                        imageUrl = imageUrl
                     };
                 }
-                )
+                );
+            var results = (await Task.WhenAll(tasks))
                 .Where(r => r is not null)
                 .OrderByDescending(r => r!.score)
                 .Take(numberOfResults) // Define a quantidade de produtos retornados;

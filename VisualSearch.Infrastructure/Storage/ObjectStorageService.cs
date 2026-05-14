@@ -25,7 +25,7 @@ namespace VisualSearch.Infrastructure.Storage
                 .WithObject(objectPath)
                 .WithStreamData(data)
                 .WithObjectSize(data.Length > 0 ? data.Length : -1) // Se o tamanho for menor que 0 (ou seja vazio) deixa como -1;
-                .WithContentType(contentType);
+                .WithContentType($"image/{contentType}");
 
             // Enviamos para o bucket
             await client.PutObjectAsync(args, ct);

@@ -23,6 +23,9 @@ namespace VisualSearch.Infrastructure.VectorStore
         public double score { get; set; }
         public Object bestAngle { get; set; }
         public DateTime? indexedAt { get; set; }
+
+        // Url para carregar a imagem no front;
+        public string imageUrl { get; set; }
     }
 
 
